@@ -1,71 +1,49 @@
-# FSESC: Fast SEcret SCanner 🛡️⚡
+# FSESC - Fast SEcret SCanner
 
-**FSESC** (pronounced *F-S-E-S-C*) is a professional-grade, ultra-fast secret scanner written in Rust. It's designed to be the "ripgrep" of security tools, scanning thousands of files in milliseconds while minimizing false positives through heuristic analysis and real-time API verification.
+High-performance security tool designed for identifying API keys and credentials in source code. Built with Rust for maximum efficiency and parallel processing.
 
-## 🚀 Key Features
+## Core Features
 
-- **Blazing Fast**: Built with Rust, `rayon`, and `memmap2`. Scans are 50-100x faster than tools written in Python or Go.
-- **Zero False Positives**: Uses Shannon Entropy and heuristic "Confidence Scoring" to ignore test data and dummy keys.
-- **Live Verification**: Use the `--verify` flag to check if found GitHub or Stripe keys are actually active.
-- **Git Hook Ready**: Easy integration with `pre-commit` framework or as a native Git hook.
-- **CI/CD Focused**: Official GitHub Action support.
+- Performance: Built using memmap2 and rayon for high-speed scanning.
+- Accuracy: Heuristic engine with confidence scoring to minimize false positives.
+- Validation: Asynchronous API verification for detected credentials.
+- Integration: Support for GitHub Actions and Git pre-commit hooks.
 
-## 📊 Benchmarks
-
-| Tool | Language | Scan Time (10k files) | Memory Usage |
-| :--- | :--- | :--- | :--- |
-| **FSESC** | **Rust** | **~420ms** | **~12MB** |
-| Gitleaks | Go | ~1.5s | ~85MB |
-| TruffleHog | Go/Python | ~4.8s | ~240MB |
-| Custom Script | Python | ~12.2s | ~45MB |
-
-*Benchmarked on a Ryzen 9 5950X scanning a large monorepo.*
-
-## 📦 Installation
+## Installation
 
 ```bash
 npm install -g @tripock/fsesc
 ```
-*Note: Requires `cargo` (Rust) to be installed on your system for native compilation.*
+*Note: Requires cargo (Rust) to be installed on your system for native compilation.*
 
-## 🛠️ Usage
+## Usage
 
-### Quick Scan
+### Direct Scanning
 ```bash
-fsesc scan .
+fsesc scan <path>
 ```
 
-### Scan with API Verification
-```bash
-fsesc scan . --verify
-```
+### Advanced Options
+- `--all`: Scan all files, bypassing default ignored patterns (.gitignore).
+- `--verify`: Enable online verification for detected secrets (GitHub, Stripe).
+- `install-hook`: Register local git pre-commit hook.
 
-### Setup Pre-commit Hook
-```bash
-fsesc init-hook
-```
+## Integration
 
-## 🧩 Integrations
-
-### GitHub Action
-Add this to your `.github/workflows/security.yml`:
-```yaml
-steps:
-  - uses: actions/checkout@v3
-  - uses: your-org/fsesc@v1
-    with:
-      verify: true
-```
+### GitHub Actions
+Reference `.github/workflows/fsesc.yml` or use the provided `action.yml`.
 
 ### Pre-commit Framework
-Add this to your `.pre-commit-config.yaml`:
+Add the following to your `.pre-commit-config.yaml`:
+
 ```yaml
-repos:
-  - repo: https://github.com/your-org/fsesc
-    rev: v1.0.0
-    hooks:
-      - id: fsesc
+- repo: local
+  hooks:
+    - id: fsesc
+      name: fsesc
+      entry: fsesc scan .
+      language: system
 ```
 
-## 📜 License
-MIT
+## Security
+This tool scans for sensitive information and may perform network requests if `--verify` is enabled. Use with caution in restricted environments.

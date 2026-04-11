@@ -1,18 +1,13 @@
 use colored::*;
 
 pub const BANNER: &str = r"
-  ██████╗ ███████╗███████╗███████╗ ██████╗
-  ██╔══██╗██╔════╝██╔════╝██╔════╝██╔════╝
-  ██████╔╝███████╗███████╗█████╗  ██║     
-  ██╔═══╝ ╚════██║╚════██║██╔══╝  ██║     
-  ██║     ███████║███████║███████╗╚██████╗
-  ╚═╝     ╚══════╝╚══════╝╚══════╝ ╚═════╝
-          Fast SEcret SCanner v0.2.0
+  FSESC - Fast SEcret SCanner
+  System Architect Edition v0.2.1
 ";
 
 pub fn print_banner() {
     println!("{}", BANNER.cyan().bold());
-    println!("{}", "—".repeat(50).dimmed());
+    println!("{}", "=".repeat(50).dimmed());
 }
 
 pub fn format_count(count: usize) -> ColoredString {

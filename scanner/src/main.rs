@@ -1,29 +1,21 @@
 mod scanner;
-mod hook;
 mod context;
 mod verifier;
 mod ui;
 mod report;
+mod hook;
 
-use anyhow::Result;
 use clap::{Parser, Subcommand};
-use colored::*;
-use ignore::WalkBuilder;
-use rayon::prelude::*;
-use std::path::PathBuf;
-use std::sync::atomic::{AtomicUsize, Ordering};
-use std::time::Instant;
-use indicatif::{ProgressBar, ProgressStyle};
+use scanner::Scanner;
+use ui::{print_banner, format_count};
+use report::ScanResultRow;
 use tabled::Table;
-
-use crate::scanner::{Scanner, Detection};
-use crate::hook::HookManager;
-use crate::verifier::Verifier;
-use crate::report::ScanResultRow;
+use std::time::Instant;
+use std::path::PathBuf;
 
 #[derive(Parser)]
 #[command(name = "fsesc")]
-#[command(about = "FSESC: Ultra-fast Secret Scanner with Verification", long_about = None)]
+#[command(about = "Fast SEcret SCanner", long_about = None)]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
@@ -32,127 +24,46 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     Scan {
-        path: Option<PathBuf>,
-        
-        #[arg(short, long)]
-        verify: bool,
-
+        path: String,
         #[arg(short, long)]
         all: bool,
-
         #[arg(short, long)]
-        json: bool,
+        verify: bool,
     },
-    InitHook,
+    InstallHook,
 }
 
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() {
     let cli = Cli::parse();
-
-    match &cli.command {
-        Commands::Scan { path, verify, all, json } => {
-            let scan_path = path.clone().unwrap_or(std::env::current_dir()?);
-            run_scan(scan_path, *verify, *all, *json).await?;
-        }
-        Commands::InitHook => {
-            HookManager::install()?;
-            println!("{} Pre-commit hook installed successfully.", "✔".green());
-        }
-    }
-
-    Ok(())
-}
-
-async fn run_scan(path: PathBuf, verify: bool, show_all: bool, json_output: bool) -> Result<()> {
-    let start = Instant::now();
-    let scanner = Scanner::new();
-    let file_count = AtomicUsize::new(0);
-
-    if !json_output {
-        ui::print_banner();
-        println!("{} Indexing files in {}...", "📂".cyan(), path.display());
-    }
-
-    let walker = WalkBuilder::new(&path)
-        .hidden(true)
-        .git_ignore(true)
-        .build();
-
-    let files: Vec<PathBuf> = walker
-        .filter_map(|e| e.ok())
-        .filter(|e| e.file_type().map(|ft| ft.is_file()).unwrap_or(false))
-        .map(|e| e.path().to_path_buf())
-        .collect();
-
-    if !json_output {
-        println!("{} Found {} files to scan.", "🔍".blue(), files.len());
-    }
-
-    let pb = if !json_output {
-        let pb = ProgressBar::new(files.len() as u64);
-        pb.set_style(ProgressStyle::default_bar()
-            .template("{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {pos}/{len} ({eta})")?
-            .progress_chars("#>-"));
-        Some(pb)
-    } else {
-        None
-    };
-
-    let mut all_detections: Vec<Detection> = files
-        .par_iter()
-        .flat_map(|file_path| {
-            if let Some(ref p) = pb { p.inc(1); }
-            file_count.fetch_add(1, Ordering::Relaxed);
-            match scanner.scan_file(file_path) {
-                Ok(detections) => {
-                    if show_all {
-                        detections
-                    } else {
-                        detections.into_iter().filter(|d| d.confidence > 0.4).collect()
-                    }
-                }
-                Err(_) => vec![],
+    match cli.command {
+        Commands::Scan { path, all, verify } => {
+            print_banner();
+            let start = Instant::now();
+            let scanner = Scanner::new(all);
+            
+            let path_buf = PathBuf::from(&path);
+            let detections = scanner.scan_path(path_buf, verify).await;
+            
+            if !detections.is_empty() {
+                let rows: Vec<ScanResultRow> = detections.iter().map(ScanResultRow::from_detection).collect();
+                println!("{}", Table::new(rows).to_string());
             }
-        })
-        .collect();
 
-    if let Some(ref p) = pb { p.finish_with_message("Scan Complete"); }
-
-    if verify && !all_detections.is_empty() {
-        if !json_output {
-            println!("{} Verifying {} potential secrets...", "🌐".magenta(), all_detections.len());
+            let duration = start.elapsed();
+            println!("\nSTATS:");
+            println!("Duration: {:?}", duration);
+            println!("Findings: {}", format_count(detections.len()));
+            
+            if !detections.is_empty() {
+                std::process::exit(1);
+            }
         }
-        let verifier = Verifier::new();
-        scanner.verify_detections(&mut all_detections, &verifier).await;
-    }
-
-    if json_output {
-        println!("{}", serde_json::to_string_pretty(&all_detections)?);
-    } else {
-        if all_detections.is_empty() {
-            println!("\n{} {}", "✨".green(), "No secrets found. Your repository is safe!".green().bold());
-        } else {
-            println!("\n{}", "⚠️  DETECTIONS FOUND".red().bold());
-            let rows: Vec<ScanResultRow> = all_detections.iter().map(ScanResultRow::from_detection).collect();
-            let table = Table::new(rows).to_string();
-            println!("{}", table);
+        Commands::InstallHook => {
+            match hook::install_git_hook() {
+                Ok(_) => println!("SUCCESS: Pre-commit hook installed."),
+                Err(e) => eprintln!("ERROR: Failed to install hook: {}", e),
+            }
         }
-
-        let duration = start.elapsed();
-        println!("\n{}", "─".repeat(50).dimmed());
-        println!(
-            "{} Finished in {:.2?} | {} Files Scanned | {} Secrets Found",
-            "📊".yellow(),
-            duration,
-            file_count.load(Ordering::SeqCst),
-            all_detections.len()
-        );
     }
-
-    if !all_detections.is_empty() {
-        std::process::exit(1);
-    }
-
-    Ok(())
 }

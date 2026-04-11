@@ -31,12 +31,12 @@ impl ScanResultRow {
 
         let ver_status = match &det.verification {
             Some(v) => match v.status {
-                VerificationStatus::Valid => "✅ VALID".green().bold().to_string(),
-                VerificationStatus::Invalid => "❌ REVOKED".red().to_string(),
-                VerificationStatus::Unknown(_) => "❓ UNKNOWN".yellow().to_string(),
-                VerificationStatus::Skipped => "—".dimmed().to_string(),
+                VerificationStatus::Valid => "VALID".green().bold().to_string(),
+                VerificationStatus::Invalid => "REVOKED".red().to_string(),
+                VerificationStatus::Unknown(_) => "UNKNOWN".yellow().to_string(),
+                VerificationStatus::Skipped => "STUB".dimmed().to_string(),
             },
-            None => "—".dimmed().to_string(),
+            None => "SKIP".dimmed().to_string(),
         };
 
         Self {
