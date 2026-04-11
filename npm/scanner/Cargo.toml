@@ -1,6 +1,6 @@
 [package]
 name = "fsesc"
-version = "1.0.2"
+version = "1.0.3"
 edition = "2021"
 authors = ["tripock"]
 description = "Fast SEcret SCanner (fsesc): Professional-grade secret scanner with verification."
