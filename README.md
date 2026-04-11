@@ -24,7 +24,7 @@
 ## 📦 Installation
 
 ```bash
-npm install -g fsesc
+npm install -g @tripock/fsesc
 ```
 *Note: Requires `cargo` (Rust) to be installed on your system for native compilation.*
 

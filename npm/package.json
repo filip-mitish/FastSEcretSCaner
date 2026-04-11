@@ -1,5 +1,5 @@
 {
-  "name": "fsesc",
+  "name": "@tripock/fsesc",
   "version": "1.0.0",
   "description": "FSESC (Fast SEcret SCanner): Professional-grade, ultra-fast secret scanner with verification and heuristic filtering.",
   "main": "bin/fsesc.js",
