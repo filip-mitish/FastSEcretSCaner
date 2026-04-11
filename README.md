@@ -1,6 +1,6 @@
 # FSESC - Fast SEcret SCanner
 
-High-performance security tool designed for identifying API keys and credentials in source code. Built with Rust for maximum efficiency and parallel processing.
+Very blyat fast scanner of your stripe or github secrets.
 
 ## Core Features
 
