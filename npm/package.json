@@ -1,13 +1,12 @@
 {
   "name": "@tripock/fsesc",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "FSESC (Fast SEcret SCanner): Professional-grade, ultra-fast secret scanner with verification and heuristic filtering.",
   "main": "bin/fsesc.js",
   "bin": {
     "fsesc": "bin/fsesc.js"
   },
   "scripts": {
-    "install": "node scripts/install.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
