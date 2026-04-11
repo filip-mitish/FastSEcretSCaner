@@ -2,7 +2,7 @@
 name = "fsesc"
 version = "1.0.1"
 edition = "2021"
-authors = ["Antigravity <antigravity@google.com>"]
+authors = ["tripock"]
 description = "Fast SEcret SCanner (fsesc): Professional-grade secret scanner with verification."
 
 [dependencies]
@@ -19,4 +19,3 @@ colored = "2.1"
 indicatif = "0.17"
 tabled = "0.15"
 futures = "0.3"
-anyhow = "1.0"

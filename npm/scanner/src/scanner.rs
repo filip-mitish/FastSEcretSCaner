@@ -2,9 +2,9 @@ use anyhow::Result;
 use memmap2::Mmap;
 use regex::{Regex, RegexSet};
 use std::fs::File;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use serde::{Serialize, Deserialize};
-use ignore::WalkBuilder;
+
 use crate::context::HeuristicEngine;
 use crate::verifier::{Verifier, VerificationResult};
 
@@ -22,11 +22,10 @@ pub struct Detection {
 pub struct Scanner {
     patterns: RegexSet,
     extractors: Vec<(String, Regex)>,
-    all_files: bool,
 }
 
 impl Scanner {
-    pub fn new(all_files: bool) -> Self {
+    pub fn new() -> Self {
         let rules = vec![
             ("AWS Access Key ID", r#"(?:A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}"#),
             ("AWS Secret Access Key", r#"(?i)aws_(?:secret|key|access_key)\s*[:=]\s*['"]?([a-zA-Z0-9/+=]{40})['"]?"#),
@@ -47,30 +46,7 @@ impl Scanner {
         Self {
             patterns: regex_set,
             extractors,
-            all_files,
         }
-    }
-
-    pub async fn scan_path(&self, root: PathBuf, verify: bool) -> Vec<Detection> {
-        let verifier = Verifier::new();
-        let mut results = Vec::new();
-        
-        let walker = WalkBuilder::new(root)
-            .hidden(!self.all_files)
-            .git_ignore(!self.all_files)
-            .build();
-
-        for entry in walker.flatten() {
-            if entry.file_type().map_or(false, |ft| ft.is_file()) {
-                if let Ok(mut detections) = self.scan_file(entry.path()) {
-                    if verify {
-                        self.verify_detections(&mut detections, &verifier).await;
-                    }
-                    results.extend(detections);
-                }
-            }
-        }
-        results
     }
 
     pub fn scan_file(&self, path: &Path) -> Result<Vec<Detection>> {
@@ -113,7 +89,7 @@ impl Scanner {
         Ok(detections)
     }
 
-    async fn verify_detections(&self, detections: &mut Vec<Detection>, verifier: &Verifier) {
+    pub async fn verify_detections(&self, detections: &mut Vec<Detection>, verifier: &Verifier) {
         for det in detections {
             let res = verifier.verify(&det.pattern_name, &det.secret_value).await;
             det.verification = Some(res);
