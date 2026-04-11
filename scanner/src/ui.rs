@@ -2,7 +2,7 @@ use colored::*;
 
 pub const BANNER: &str = r"
   FSESC - Fast SEcret SCanner
-  System Architect Edition v0.2.1
+  System Architect Edition v1.0.0
 ";
 
 pub fn print_banner() {
