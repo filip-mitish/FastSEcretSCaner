@@ -2,7 +2,7 @@ const { execSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
-const scannerPath = path.join(__dirname, '..', '..', 'scanner');
+const scannerPath = path.join(__dirname, '..', 'scanner');
 const targetBinPath = path.join(__dirname, '..', 'bin', 'fsesc-native');
 
 console.log('Building FSESC native binary...');

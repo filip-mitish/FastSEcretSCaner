@@ -10,7 +10,7 @@ if (!fs.existsSync(binPath)) {
     process.exit(1);
 }
 
-// Pass all arguments to the Rust binary
+
 const args = process.argv.slice(2);
 const child = spawn(binPath, args, {
     stdio: 'inherit'

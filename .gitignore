@@ -1,8 +1,8 @@
-/scanner/target
+/npm/scanner/target
 /npm/node_modules
-/npm/bin/fsesc-native
+/npm/bin/*-native
 *.log
 .DS_Store
 test_secrets.env
-/scanner/Cargo.lock
+/npm/scanner/Cargo.lock
 /npm/package-lock.json
