@@ -1,0 +1,8 @@
+/scanner/target
+/npm/node_modules
+/npm/bin/fsesc-native
+*.log
+.DS_Store
+test_secrets.env
+/scanner/Cargo.lock
+/npm/package-lock.json

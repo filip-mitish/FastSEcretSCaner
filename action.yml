@@ -1,0 +1,39 @@
+name: 'FSESC Secret Scanner'
+description: 'Ultra-fast secret scanner with verification and heuristic filtering.'
+author: 'Antigravity'
+branding:
+  icon: 'shield'
+  color: 'red'
+
+inputs:
+  path:
+    description: 'Path to scan'
+    required: false
+    default: '.'
+  verify:
+    description: 'Verify found secrets via API calls'
+    required: false
+    default: 'false'
+  all:
+    description: 'Show all detections (including low confidence ones)'
+    required: false
+    default: 'false'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+      shell: bash
+
+    - name: Install FSESC
+      run: |
+        npm install -g .
+      shell: bash
+
+    - name: Run FSESC
+      run: |
+        fsesc scan ${{ inputs.path }} \
+          ${{ inputs.verify == 'true' && '--verify' || '' }} \
+          ${{ inputs.all == 'true' && '--all' || '' }}
+      shell: bash

@@ -1,0 +1,9 @@
+- id: fsesc
+  name: FSESC (Fast SEcret SCanner)
+  description: Ultra-fast secret scanner with verification and heuristic filtering.
+  entry: fsesc scan .
+  language: node
+  files: ""
+  types: [text]
+  pass_filenames: false
+  additional_dependencies: ["fsesc@latest"]
