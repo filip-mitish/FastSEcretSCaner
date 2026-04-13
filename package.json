@@ -1,12 +1,13 @@
 {
   "name": "@tripock/fsesc",
-  "version": "1.1.2",
+  "version": "1.1.4",
   "description": "FSESC (Fast SEcret SCanner): Professional-grade, ultra-fast secret scanner.",
   "main": "bin/fsesc.js",
   "bin": {
     "fsesc": "bin/fsesc.js"
   },
   "scripts": {
+    "install": "node scripts/install.js",
     "build": "cd scanner && cargo build --release && cp target/release/fsesc ../bin/fsesc-native",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

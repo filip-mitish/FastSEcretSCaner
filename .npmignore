@@ -1,0 +1,10 @@
+# Exclude test data
+test_secrets.env
+
+# Exclude source for build (optional, but better to keep for transparency)
+# However, scanner/target must be excluded
+scanner/target/
+
+# Exclude specific CI/CD files not needed in NPM
+action.yml
+.pre-commit-hooks.yaml
