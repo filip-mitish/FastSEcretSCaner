@@ -1,8 +1,15 @@
-/scanner/target
-/npm/node_modules
+# Rust
+/npm/scanner/target/
+
+# Node
+node_modules/
+dist/
+fsesc-*.tgz
+
+# Native Binaries
+# These are generated during build/installation
 /npm/bin/fsesc-native
-*.log
+
+# OS
 .DS_Store
-test_secrets.env
-/scanner/Cargo.lock
-/npm/package-lock.json
+Thumbs.db

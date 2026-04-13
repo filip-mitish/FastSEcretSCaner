@@ -1,6 +1,6 @@
 name: 'FSESC Secret Scanner'
-description: 'Ultra-fast secret scanner with verification and heuristic filtering.'
-author: 'Antigravity'
+description: 'Ultra-fast secret scanner with heuristic local filtering.'
+author: 'tripock'
 branding:
   icon: 'shield'
   color: 'red'
@@ -10,10 +10,6 @@ inputs:
     description: 'Path to scan'
     required: false
     default: '.'
-  verify:
-    description: 'Verify found secrets via API calls'
-    required: false
-    default: 'false'
   all:
     description: 'Show all detections (including low confidence ones)'
     required: false
@@ -28,12 +24,12 @@ runs:
 
     - name: Install FSESC
       run: |
+        npm run build
         npm install -g .
       shell: bash
 
     - name: Run FSESC
       run: |
         fsesc scan ${{ inputs.path }} \
-          ${{ inputs.verify == 'true' && '--verify' || '' }} \
           ${{ inputs.all == 'true' && '--all' || '' }}
       shell: bash

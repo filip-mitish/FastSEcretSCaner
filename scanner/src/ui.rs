@@ -1,7 +1,7 @@
 use colored::*;
 
 pub const BANNER: &str = r"
-  FSESC V1.0.0
+  FSESC - Fast SEcret SCanner
 ";
 
 pub fn print_banner() {

@@ -1,48 +1,47 @@
 # FSESC - Fast SEcret SCanner
 
-Very blyat fast scanner of your stripe or github secrets.
+High-performance security tool for identifying API keys and credentials. Built with Rust for maximum efficiency and security. 100% local, no network requests.
 
-## Core Features
+## Architecture
 
-- Performance: Built using memmap2 and rayon for high-speed scanning.
-- Accuracy: Heuristic engine with confidence scoring to minimize false positives.
-- Integration: Support for GitHub Actions and Git pre-commit hooks.
-- Local-only: No external network requests, ensuring data privacy.
+FSESC consists of two parts:
+1.  **Core (Rust)**: High-speed scanning engine located in `/npm/scanner`.
+2.  **Wrapper (Node.js)**: CLI interface and git hook manager.
 
 ## Installation
 
+### From NPM
 ```bash
 npm install -g @tripock/fsesc
 ```
-*Note: Requires cargo (Rust) to be installed on your system for native compilation.*
+
+### From Source
+```bash
+git clone https://github.com/filip-mitish/FastSEcretSCaner.git
+cd FastSEcretSCaner/npm
+npm run build
+npm install -g .
+```
 
 ## Usage
 
-### Direct Scanning
+### Scan Directory
 ```bash
-fsesc scan <path>
+fsesc scan .
 ```
+- `--all`: Ignore `.gitignore` rules and scan everything.
 
-### Advanced Options
-- `--all`: Scan all files, bypassing default ignored patterns (.gitignore).
-- `install-hook`: Register local git pre-commit hook.
-
-## Integration
-
-### GitHub Actions
-Reference `.github/workflows/fsesc.yml` or use the provided `action.yml`.
-
-### Pre-commit Framework
-Add the following to your `.pre-commit-config.yaml`:
-
-```yaml
-- repo: local
-  hooks:
-    - id: fsesc
-      name: fsesc
-      entry: fsesc scan .
-      language: system
+### Git Pre-commit Hook
+You can optionally install a local git hook to prevent accidental secret leaks:
+```bash
+fsesc install-hook
 ```
+*Note: This command only modifies `.git/hooks/pre-commit` in the current repository. It is transparent and easy to remove.*
 
-## Security
-This tool scans for sensitive information locally. It does not perform any network requests.
+## Security & Privacy
+- **No telemetry**: FSESC does not collect any data.
+- **Local only**: All scanning logic stays on your machine. No external APIs are called.
+- **Open Source**: Verify the logic yourself in `scanner/src/`.
+
+## Author
+tripock
