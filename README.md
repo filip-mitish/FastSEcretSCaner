@@ -6,8 +6,8 @@ Very blyat fast scanner of your stripe or github secrets.
 
 - Performance: Built using memmap2 and rayon for high-speed scanning.
 - Accuracy: Heuristic engine with confidence scoring to minimize false positives.
-- Validation: Asynchronous API verification for detected credentials.
 - Integration: Support for GitHub Actions and Git pre-commit hooks.
+- Local-only: No external network requests, ensuring data privacy.
 
 ## Installation
 
@@ -25,7 +25,6 @@ fsesc scan <path>
 
 ### Advanced Options
 - `--all`: Scan all files, bypassing default ignored patterns (.gitignore).
-- `--verify`: Enable online verification for detected secrets (GitHub, Stripe).
 - `install-hook`: Register local git pre-commit hook.
 
 ## Integration
@@ -46,4 +45,4 @@ Add the following to your `.pre-commit-config.yaml`:
 ```
 
 ## Security
-This tool scans for sensitive information and may perform network requests if `--verify` is enabled. Use with caution in restricted environments.
+This tool scans for sensitive information locally. It does not perform any network requests.

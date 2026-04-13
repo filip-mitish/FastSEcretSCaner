@@ -2,11 +2,12 @@ use anyhow::Result;
 use memmap2::Mmap;
 use regex::{Regex, RegexSet};
 use std::fs::File;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use serde::{Serialize, Deserialize};
+use rayon::prelude::*;
+use ignore::WalkBuilder;
 
 use crate::context::HeuristicEngine;
-use crate::verifier::{Verifier, VerificationResult};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Detection {
@@ -16,16 +17,16 @@ pub struct Detection {
     pub secret_value: String,
     pub entropy: f64,
     pub confidence: f64,
-    pub verification: Option<VerificationResult>,
 }
 
 pub struct Scanner {
     patterns: RegexSet,
     extractors: Vec<(String, Regex)>,
+    scan_all: bool,
 }
 
 impl Scanner {
-    pub fn new() -> Self {
+    pub fn new(scan_all: bool) -> Self {
         let rules = vec![
             ("AWS Access Key ID", r#"(?:A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}"#),
             ("AWS Secret Access Key", r#"(?i)aws_(?:secret|key|access_key)\s*[:=]\s*['"]?([a-zA-Z0-9/+=]{40})['"]?"#),
@@ -46,7 +47,23 @@ impl Scanner {
         Self {
             patterns: regex_set,
             extractors,
+            scan_all,
         }
+    }
+
+    pub fn scan_path(&self, path: PathBuf) -> Vec<Detection> {
+        let mut walker = WalkBuilder::new(path);
+        walker.standard_filters(!self.scan_all);
+        
+        let files: Vec<PathBuf> = walker.build()
+            .filter_map(|e| e.ok())
+            .filter(|e| e.file_type().map(|ft| ft.is_file()).unwrap_or(false))
+            .map(|e| e.into_path())
+            .collect();
+
+        files.par_iter()
+            .flat_map(|p| self.scan_file(p).unwrap_or_default())
+            .collect()
     }
 
     pub fn scan_file(&self, path: &Path) -> Result<Vec<Detection>> {
@@ -80,20 +97,12 @@ impl Scanner {
                         secret_value: value.to_string(),
                         entropy,
                         confidence,
-                        verification: None,
                     });
                 }
             }
         }
 
         Ok(detections)
-    }
-
-    pub async fn verify_detections(&self, detections: &mut Vec<Detection>, verifier: &Verifier) {
-        for det in detections {
-            let res = verifier.verify(&det.pattern_name, &det.secret_value).await;
-            det.verification = Some(res);
-        }
     }
 }
 

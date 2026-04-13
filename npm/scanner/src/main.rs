@@ -1,6 +1,5 @@
 mod scanner;
 mod context;
-mod verifier;
 mod ui;
 mod report;
 mod hook;
@@ -27,23 +26,20 @@ enum Commands {
         path: String,
         #[arg(short, long)]
         all: bool,
-        #[arg(short, long)]
-        verify: bool,
     },
     InstallHook,
 }
 
-#[tokio::main]
-async fn main() {
+fn main() {
     let cli = Cli::parse();
     match cli.command {
-        Commands::Scan { path, all, verify } => {
+        Commands::Scan { path, all } => {
             print_banner();
             let start = Instant::now();
             let scanner = Scanner::new(all);
             
             let path_buf = PathBuf::from(&path);
-            let detections = scanner.scan_path(path_buf, verify).await;
+            let detections = scanner.scan_path(path_buf);
             
             if !detections.is_empty() {
                 let rows: Vec<ScanResultRow> = detections.iter().map(ScanResultRow::from_detection).collect();

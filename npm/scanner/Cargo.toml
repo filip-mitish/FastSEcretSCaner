@@ -3,7 +3,7 @@ name = "fsesc"
 version = "1.1.1"
 edition = "2021"
 authors = ["tripock"]
-description = "Fast SEcret SCanner (fsesc): Professional-grade secret scanner with verification."
+description = "Fast SEcret SCanner (fsesc): Professional-grade secret scanner."
 
 [dependencies]
 clap = { version = "4.4", features = ["derive"] }
@@ -11,11 +11,9 @@ regex = "1.10"
 rayon = "1.8"
 ignore = "0.4"
 memmap2 = "0.9"
-tokio = { version = "1.35", features = ["full"] }
-reqwest = { version = "0.11", features = ["json"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 colored = "2.1"
 indicatif = "0.17"
 tabled = "0.15"
-futures = "0.3"
+anyhow = "1.0"
